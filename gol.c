@@ -2,7 +2,7 @@
 #include <unistd.h> //For usleep
 #include <stdlib.h> //For system clear
 #include <string.h> //For memcopy
-
+#include <assert.h> //For tests
 #define ROWS 63
 #define COLS 63
 
@@ -44,13 +44,14 @@ int cNeighbors(void *g, int x, int y) {
 
 	return aliveAroundMe;
 }
+
+//Make them live or die
 void liveOrDie(void *g, void *g1)
 {
 	unsigned (*grid)[ROWS] = g;
-	//unsigned new[ROWS][COLS];
 
 	unsigned (*grid1)[ROWS] = g1;
-	//unsigned new[ROWS][COLS];
+
 
     int x, y;
 	for (int i = 0; i < ROWS; i++) {
@@ -70,7 +71,7 @@ void liveOrDie(void *g, void *g1)
 		}
 	}
 }
-
+//Show them on terminal
 void show(void *g, int h, int w)
 {
 	unsigned (*grid)[w] = g;
@@ -83,8 +84,6 @@ void show(void *g, int h, int w)
 		{
 			if (grid[x][y] == 1)
 			{
-				//printf("Found live one@ ");
-				//printf("col(x): %d, row(y): %d\n", x, y);
 				printf("\033[0;32m"); 
 				printf("@");
 				printf("\033[0m");
@@ -100,10 +99,55 @@ void show(void *g, int h, int w)
 	//usleep(100000);
 }
 
+//import txt file
+void load(char*name,void *g){
+	unsigned (*grid)[ROWS] = g;
+
+	//import txt file
+	const char *In = name;
+	FILE *inputFile = fopen(In, "r");
+	int x, y;
+	while (fscanf(inputFile, "%d,%d", &x, &y) == 2){
+		grid[x][y] = 1;
+	}
+}
+
+void testGeneration()
+{
+
+}
+
+void testLoad(){
+	int grid[ROWS][COLS] = {0};
+	FILE *inputFile = fopen("in1.txt", "r");
+	int x, y;
+	while (fscanf(inputFile, "%d,%d", &x, &y) == 2){
+		grid[x][y] = 1;
+			}
+	assert(grid[1][0]==1);
+	assert(grid[2][1]==1);
+	assert(grid[0][2]==1);
+	assert(grid[1][2]==1);
+	assert(grid[2][2]==1);
+	assert(grid[0][0]!=1);
+	assert(grid[0][1]!=1);
+}
+
+void testOuput(){
+
+}
+
+void runTests()
+{
+	testLoad();
+}
 
 
 int main( int argc, char *argv[])
 {
+	runTests();
+
+
 	//Exit if no Arguments
 	 if(argc <2){
         printf("No argument entered. Correct format is:\n");
@@ -111,9 +155,11 @@ int main( int argc, char *argv[])
       return 0;
 	 }
 
+	
+
+
 
 	//Grid Size
-	//int w = ROWS, h = 63;
 	int grid[ROWS][COLS] = {0};
 	int grid1[ROWS][COLS] = {0};
 	int generations = 100;
@@ -125,14 +171,9 @@ int main( int argc, char *argv[])
 		i =2;
 	}
 	
+	load( argv[i], grid);
 
-	//import txt file
-	FILE *inputFile = fopen(argv[i], "r");
-	int x, y;
-	while (fscanf(inputFile, "%d,%d", &x, &y) == 2){
-		grid[x][y] = 1;
-	}
-    writeToConsole(grid, ROWS, COLS);
+    //writeToConsole(grid, ROWS, COLS);
     while(argv[i] != NULL){
 		char *a = argv[i]; // how many generations should run
 		generations = atoi(a); 
@@ -173,23 +214,6 @@ int main( int argc, char *argv[])
 		}
 		i++;
     }
-   
-
-
-//   //show(grid,ROWS, COLS);
-//   while (generations) {
-//   	int swap[ROWS][COLS] = {0};
-//   	system("clear");
-//   	liveOrDie(grid,grid1);
-//       show(grid,ROWS, COLS);
-//   
-//   	//Swap
-//   	memcpy(grid, grid1, sizeof(grid));
-//   	memcpy(grid1, swap, sizeof(grid));
-//   
-//   }
-	//liveOrDie(grid,grid1);
-	//printf("\n");
-	//writeToConsole(grid, ROWS, COLS);
+  
 	return 0;
 }
