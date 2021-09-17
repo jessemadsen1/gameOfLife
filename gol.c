@@ -117,15 +117,22 @@ int main( int argc, char *argv[])
 	int grid[ROWS][COLS] = {0};
 	int grid1[ROWS][COLS] = {0};
 	int generations = 100;
+	int showArg =0;
+
+    int i = 1;//start out at second arg
+	if (*argv[i]== 's'){
+		showArg =1;
+		i =2;
+	}
+	
 
 	//import txt file
-	FILE *inputFile = fopen(argv[1], "r");
+	FILE *inputFile = fopen(argv[i], "r");
 	int x, y;
 	while (fscanf(inputFile, "%d,%d", &x, &y) == 2){
 		grid[x][y] = 1;
 	}
     writeToConsole(grid, ROWS, COLS);
-    int i = 2;//start out at second arg
     while(argv[i] != NULL){
 		char *a = argv[i]; // how many generations should run
 		generations = atoi(a); 
@@ -133,7 +140,12 @@ int main( int argc, char *argv[])
 			int swap[ROWS][COLS] = {0};
 			system("clear");
 			liveOrDie(grid,grid1);
+
+    		//to show -s must be first arg
+			if(showArg ==1){
     		show(grid,ROWS, COLS);
+			}
+
 			//Swap
 			memcpy(grid, grid1, sizeof(grid));
 			memcpy(grid1, swap, sizeof(grid));
@@ -152,7 +164,6 @@ int main( int argc, char *argv[])
 				{
 					if (grid[x][y] == 1)
 					{
-					printf("col(x): %d, row(y): %d\n", x, y);
    					fprintf(fp, "%d,%d\n",x,y);
 					}
 				}
