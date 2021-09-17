@@ -2,6 +2,7 @@
 #include <unistd.h> //For usleep
 #include <stdlib.h> //For system clear
 #include <string.h> //For memcopy
+
 #define ROWS 63
 #define COLS 63
 
@@ -123,8 +124,8 @@ int main( int argc, char *argv[])
 	while (fscanf(inputFile, "%d,%d", &x, &y) == 2){
 		grid[x][y] = 1;
 	}
-
-    int i = 2;//start out at second document 
+    writeToConsole(grid, ROWS, COLS);
+    int i = 2;//start out at second arg
     while(argv[i] != NULL){
 		char *a = argv[i]; // how many generations should run
 		generations = atoi(a); 
@@ -137,12 +138,33 @@ int main( int argc, char *argv[])
 			memcpy(grid, grid1, sizeof(grid));
 			memcpy(grid1, swap, sizeof(grid));
 			generations--;
+
+			char txt [12] =".txt";
+			char output [12] ="";
+			strcat(output,a);
+			strcat(output,txt);
+
+			FILE *fp;
+  			fp = fopen(output, "w+");
+			for (int x = 0; x < ROWS; x++)
+			{
+				for (int y = 0; y < COLS; y++)
+				{
+					if (grid[x][y] == 1)
+					{
+					printf("col(x): %d, row(y): %d\n", x, y);
+   					fprintf(fp, "%d,%d\n",x,y);
+					}
+				}
+			}
+			fputs("End of file...\n", fp);
+   			fclose(fp);
 		}
 		i++;
     }
    
 
-//   //writeToConsole(grid, ROWS, COLS);
+
 //   //show(grid,ROWS, COLS);
 //   while (generations) {
 //   	int swap[ROWS][COLS] = {0};
