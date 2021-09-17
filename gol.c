@@ -23,14 +23,15 @@ void writeToConsole(void *g, int h, int w)
 		}
 	}
 }
-//Count Neightbors
+//Count Neighbors
 int cNeighbors(void *g, int x, int y) {
 	unsigned (*grid)[ROWS] = g;
 	int aliveAroundMe = 0;
 
 	for (int i = -1; i < 2; i++) {
 		for (int j = -1; j < 2; j++) {
-			//convert to cordinates
+			//convert to coordinates?? rolling problem with modulus
+
 			int row = (x + i + ROWS) % ROWS;
 			int col = (y + j + COLS) % COLS;
 
@@ -99,36 +100,63 @@ void show(void *g, int h, int w)
 }
 
 
+
 int main( int argc, char *argv[])
 {
+	//Exit if no Arguments
+	 if(argc <2){
+        printf("No argument entered. Correct format is:\n");
+		printf(" ./prog <path-to-input-configuration> <path-to-output-dir> <number-of-generations-to-run-before-saving>+\n");
+      return 0;
+	 }
+
+
 	//Grid Size
 	//int w = ROWS, h = 63;
 	int grid[ROWS][COLS] = {0};
 	int grid1[ROWS][COLS] = {0};
+	int generations = 100;
 
 	//import txt file
-	FILE *inputFile = fopen("board.txt", "r");
+	FILE *inputFile = fopen(argv[1], "r");
 	int x, y;
-	while (fscanf(inputFile, "%d,%d", &x, &y) == 2)
-	{
+	while (fscanf(inputFile, "%d,%d", &x, &y) == 2){
 		grid[x][y] = 1;
 	}
 
-	//writeToConsole(grid, ROWS, COLS);
-	//show(grid,ROWS, COLS);
-	while (1) {
-		int swap[ROWS][COLS] = {0};
-		system("clear");
-		liveOrDie(grid,grid1);
-	    show(grid,ROWS, COLS);
+    int i = 2;//start out at second document 
+    while(argv[i] != NULL){
+		char *a = argv[i]; // how many generations should run
+		generations = atoi(a); 
+		while (generations > 0) {
+			int swap[ROWS][COLS] = {0};
+			system("clear");
+			liveOrDie(grid,grid1);
+    		show(grid,ROWS, COLS);
+			//Swap
+			memcpy(grid, grid1, sizeof(grid));
+			memcpy(grid1, swap, sizeof(grid));
+			generations--;
+		}
+		i++;
+    }
+   
 
-		//Swap
-		memcpy(grid, grid1, sizeof(grid));
-		memcpy(grid1, swap, sizeof(grid));
-
-	}
+//   //writeToConsole(grid, ROWS, COLS);
+//   //show(grid,ROWS, COLS);
+//   while (generations) {
+//   	int swap[ROWS][COLS] = {0};
+//   	system("clear");
+//   	liveOrDie(grid,grid1);
+//       show(grid,ROWS, COLS);
+//   
+//   	//Swap
+//   	memcpy(grid, grid1, sizeof(grid));
+//   	memcpy(grid1, swap, sizeof(grid));
+//   
+//   }
 	//liveOrDie(grid,grid1);
-	printf("\n");
-	writeToConsole(grid, ROWS, COLS);
+	//printf("\n");
+	//writeToConsole(grid, ROWS, COLS);
 	return 0;
 }
