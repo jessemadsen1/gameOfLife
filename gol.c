@@ -8,14 +8,14 @@
 
 
 //will write a 2d array to console
-void writeToConsole(void *g, int h, int w)
+void writeToConsole(void *g)
 {
-	unsigned (*grid)[h] = g;
+	unsigned (*grid)[ROWS] = g;
 	int x,y;
 
-	for (int x = 0; x < h; x++)
+	for (int x = 0; x < ROWS; x++)
 	{
-		for (int y = 0; y < h; y++)
+		for (int y = 0; y <COLS; y++)
 		{
 			if (grid[x][y] == 1)
 			{
@@ -24,6 +24,7 @@ void writeToConsole(void *g, int h, int w)
 		}
 	}
 }
+
 //Count Neighbors
 int cNeighbors(void *g, int x, int y) {
 	unsigned (*grid)[ROWS] = g;
@@ -31,34 +32,30 @@ int cNeighbors(void *g, int x, int y) {
 
 	for (int i = -1; i < 2; i++) {
 		for (int j = -1; j < 2; j++) {
-			//convert to coordinates?? rolling problem with modulus
 
+			//rolling problem with modulus?
 			int row = (x + i + ROWS) % ROWS;
 			int col = (y + j + COLS) % COLS;
 
+			//add all 1's and 0's up
 			aliveAroundMe += grid[row][col];
 		}
 	}
 
 	aliveAroundMe -= grid[x][y];
-
 	return aliveAroundMe;
 }
 
-//Make them live or die
+//Will complete on generation of evolution 
 void liveOrDie(void *g, void *g1)
 {
 	unsigned (*grid)[ROWS] = g;
-
 	unsigned (*grid1)[ROWS] = g1;
-
-
     int x, y;
 	for (int i = 0; i < ROWS; i++) {
 		for (int j = 0; j < COLS; j++) {
 			int aliveOrDead = grid[i][j];
 			int neighbors = cNeighbors(grid, i, j);
-
 			if (aliveOrDead == 0 && neighbors == 3) {
 				grid1[i][j] = 1;
 			} else if
@@ -67,15 +64,15 @@ void liveOrDie(void *g, void *g1)
 			} else {
 				grid1[i][j] = grid[i][j];
 			}
-			
 		}
 	}
 }
-//Show them on terminal
+
+
+//Show grid on terminal, very slow
 void show(void *g, int h, int w)
 {
-	unsigned (*grid)[w] = g;
-	//unsigned new[h][w];
+	unsigned (*grid)[ROWS] = g;
     int x, y;
  
 	for (int x = 0; x < h; x++)
@@ -96,7 +93,7 @@ void show(void *g, int h, int w)
 		}
 		printf("...\n");
 	}
-	//usleep(100000);
+	usleep(200000);
 }
 
 //import txt file
@@ -112,18 +109,47 @@ void load(char*name,void *g){
 	}
 }
 
-void testGeneration()
-{
+void writeTxt(char * a,void *g){
+	unsigned (*grid)[ROWS] = g;
+	char txt [12] =".txt";
+	char output [12] ="";
+	strcat(output,a);
+	strcat(output,txt);
+
+	FILE *fp;
+  	fp = fopen(output, "w+");
+	for (int x = 0; x < ROWS; x++)
+	{
+		for (int y = 0; y < COLS; y++)
+		{
+			if (grid[x][y] == 1)
+			{
+   			fprintf(fp, "%d,%d\n",x,y);
+			}
+		}
+	}
+	//fputs("End of file...\n", fp);
+   	fclose(fp);
 
 }
+void testwrite(char*name,void *g)
+{
+	unsigned (*grid)[ROWS] = g;
+	load(name, grid);
 
-void testLoad(){
-	int grid[ROWS][COLS] = {0};
-	FILE *inputFile = fopen("in1.txt", "r");
-	int x, y;
-	while (fscanf(inputFile, "%d,%d", &x, &y) == 2){
-		grid[x][y] = 1;
-			}
+	char a[4] = "test";
+	char *b = a;
+	writeTxt(b,grid);
+
+	grid[1][0]=0;
+	grid[2][1]=0;
+	grid[0][2]=0;
+	grid[1][2]=0;
+	grid[2][2]=0;
+
+
+	load("test.txt", grid);
+
 	assert(grid[1][0]==1);
 	assert(grid[2][1]==1);
 	assert(grid[0][2]==1);
@@ -133,18 +159,75 @@ void testLoad(){
 	assert(grid[0][1]!=1);
 }
 
-void testOuput(){
+
+void testLoad(char*name,void *g){
+	unsigned (*grid)[ROWS] = g;
+	load(name, grid);
+	assert(grid[1][0]==1);
+	assert(grid[2][1]==1);
+	assert(grid[0][2]==1);
+	assert(grid[1][2]==1);
+	assert(grid[2][2]==1);
+	assert(grid[0][0]!=1);
+	assert(grid[0][1]!=1);
+}
+
+void testOutput(){
+	int grid[ROWS][COLS] = {0};
+	int grid1[ROWS][COLS] = {0};
+	char *a = "5";
+	grid[1][0]=0;
+	grid[2][1]=0;
+	grid[0][2]=0;
+	grid[1][2]=0;
+	grid[2][2]=0;
+
+	assert(grid[1][0]==0);
+	assert(grid[2][1]==0);
+	assert(grid[0][2]==0);
+	assert(grid[1][2]==0);
+	assert(grid[2][2]==0);
+
+	load( "in1.txt", grid);
+	int i =1;
+	i++;
+	int generations =5;
+
+	while (generations> 0) {
+		int swap[ROWS][COLS] = {0};
+		liveOrDie(grid,grid1);
+		//Swap
+		memcpy(grid, grid1, sizeof(grid));
+		memcpy(grid1, swap, sizeof(grid));
+		--generations;
+	}
+	//Reversed x and y compared to out_5.txt
+	//Mine matches https://playgameoflife.com/
+	assert(grid[1][2]==1);
+	assert(grid[2][3]==1);
+	assert(grid[2][4]==1);
+	assert(grid[3][2]==1);
+	assert(grid[3][3]==1);
 
 }
 
 void runTests()
 {
-	testLoad();
+	int gridTest[ROWS][COLS] = {0};
+	testLoad("in1.txt",gridTest);
+	testwrite("in1.txt",gridTest);
+	testOutput();
 }
 
 
 int main( int argc, char *argv[])
 {
+	//Grid Size
+	int grid[ROWS][COLS] = {0};
+	int grid1[ROWS][COLS] = {0};
+	int generations = 100;
+	int showArg =0;
+
 	runTests();
 
 
@@ -155,63 +238,37 @@ int main( int argc, char *argv[])
       return 0;
 	 }
 
-	
-
-
-
-	//Grid Size
-	int grid[ROWS][COLS] = {0};
-	int grid1[ROWS][COLS] = {0};
-	int generations = 100;
-	int showArg =0;
-
-    int i = 1;//start out at second arg
+    int i = 1;//For Arg count
+	//check they want to show board Use s
 	if (*argv[i]== 's'){
 		showArg =1;
 		i =2;
 	}
 	
 	load( argv[i], grid);
-
-    //writeToConsole(grid, ROWS, COLS);
+    i++;
     while(argv[i] != NULL){
 		char *a = argv[i]; // how many generations should run
 		generations = atoi(a); 
-		while (generations > 0) {
+		while (generations> 0) {
 			int swap[ROWS][COLS] = {0};
-			system("clear");
-			liveOrDie(grid,grid1);
 
-    		//to show -s must be first arg
-			if(showArg ==1){
-    		show(grid,ROWS, COLS);
-			}
+			//send to grow or die
+			liveOrDie(grid,grid1);
 
 			//Swap
 			memcpy(grid, grid1, sizeof(grid));
-			memcpy(grid1, swap, sizeof(grid));
-			generations--;
+			memcpy(grid1, swap, sizeof(grid));		
+			--generations;
 
-			char txt [12] =".txt";
-			char output [12] ="";
-			strcat(output,a);
-			strcat(output,txt);
-
-			FILE *fp;
-  			fp = fopen(output, "w+");
-			for (int x = 0; x < ROWS; x++)
-			{
-				for (int y = 0; y < COLS; y++)
-				{
-					if (grid[x][y] == 1)
-					{
-   					fprintf(fp, "%d,%d\n",x,y);
-					}
-				}
+			//system("clear");
+			//writeToConsole(grid);
+			if(showArg ==1){
+			system("clear");
+    		show(grid,ROWS, COLS);			
 			}
-			fputs("End of file...\n", fp);
-   			fclose(fp);
 		}
+		writeTxt(argv[i],grid);
 		i++;
     }
   

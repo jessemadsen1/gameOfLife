@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${fileDirname}/${fileBasenameNoExtension}",
-            "args": ["gliderGun.txt", "10" ,"20"],
+            "args": ["s", "in1.txt", "5"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
